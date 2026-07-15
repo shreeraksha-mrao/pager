@@ -1,6 +1,5 @@
 import { useDebtDashboard } from '../hooks/useAnalytics';
 import StatCard from '../components/StatCard';
-import DebtTrendChart from '../components/DebtTrendChart';
 
 export default function DebtDashboard() {
   const { data, isLoading, error } = useDebtDashboard();
@@ -33,11 +32,6 @@ export default function DebtDashboard() {
           </div>
         ))}
       </div>
-
-      <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-        <h2 className="mb-2 text-sm font-semibold text-slate-200">Cumulative debt trend</h2>
-        <DebtTrendChart tasks={data.tasks} />
-      </section>
     </div>
   );
 }
