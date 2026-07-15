@@ -9,6 +9,9 @@ services:
       # Set this in a local .env file (see .env.example) — never commit real tokens
       - PAGER_TELEGRAM_BOT_TOKEN=${PAGER_TELEGRAM_BOT_TOKEN}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+      # Working hours/scheduler logic uses the JVM's local timezone — pin it to IST
+      # so behavior matches local dev regardless of the host VM's system timezone (UTC).
+      - TZ=Asia/Kolkata
     volumes:
       - pager-data:/data
     ports:
