@@ -30,13 +30,13 @@ pager:
     polling-interval-ms: 2000
   scheduler:
     tick-interval-ms: 300000          # 5 min
-    working-hours-start: "11:00"
+    working-hours-start: "08:00"
     working-hours-end: "17:00"
     night-low-window-start: "01:00"   # 1AM - 7AM => 30% relative probability
     night-low-window-end: "07:00"
     night-low-probability: 0.30
-    night-medium-window-start: "07:00" # 7AM - 11AM => 75% relative probability
-    night-medium-window-end: "11:00"
+    night-medium-window-start: "07:00" # 7AM - 8AM => 75% relative probability
+    night-medium-window-end: "08:00"
     night-medium-probability: 0.75
     base-tick-probability: 0.15
     max-tick-probability: 0.60
@@ -48,6 +48,9 @@ pager:
     confirmation-reminder-interval-minutes: 25
     confirmation-reminder-max-count: 6
     daily-minimum-target-minutes: 210 # 3.5h default combined objective
+    day-cutoff-hour: 2                # "today" runs 2AM -> 2AM, not midnight -> midnight
+    rollover-cron: "0 1 2 * * *"      # keep ~1 min after day-cutoff-hour
+    min-qualifying-pause-minutes: 15  # pauses shorter than this never affect debt rollover
 
 logging:
   level:

@@ -34,11 +34,17 @@ public class PagerPauseService {
 
     private final PagerPausePeriodRepository repository;
     private final PagerPauseDebtSnapshotRepository snapshotRepository;
+    private final PagerDayService pagerDayService;
+    private final com.pager.config.SchedulerProperties props;
 
     public PagerPauseService(PagerPausePeriodRepository repository,
-                              PagerPauseDebtSnapshotRepository snapshotRepository) {
+                              PagerPauseDebtSnapshotRepository snapshotRepository,
+                              PagerDayService pagerDayService,
+                              com.pager.config.SchedulerProperties props) {
         this.repository = repository;
         this.snapshotRepository = snapshotRepository;
+        this.pagerDayService = pagerDayService;
+        this.props = props;
     }
 
     @Transactional(readOnly = true)
@@ -103,15 +109,20 @@ public class PagerPauseService {
     }
 
     /**
-     * Total minutes of pause overlapping the given calendar date, clamped to
-     * that day's [00:00, 24:00) window. Used only for historical (past-date)
-     * debt-rollover exemption — NOT for live "today" freezing, which instead
-     * uses the exact frozen snapshot via frozenDebtFor while a pause is open.
+     * Total minutes of pause overlapping the given pager-day (see PagerDayService — a
+     * "day" runs from the configured cutoff hour, default 2 AM, to the same time next
+     * calendar day, not midnight-to-midnight). Only pause *periods* whose full duration
+     * meets {@code minQualifyingPauseMinutes} count at all — this keeps brief, incidental
+     * toggles (e.g. testing the pause button for a couple of minutes) from silently
+     * shaving minutes off a day's target; only genuine "I can't take pages" pauses do.
+     * Used only for historical (past-date) debt-rollover exemption — NOT for live "today"
+     * freezing, which instead uses the exact frozen snapshot via frozenDebtFor while a
+     * pause is open.
      */
     @Transactional(readOnly = true)
     public int pausedMinutesOn(LocalDate date) {
-        LocalDateTime dayStart = date.atStartOfDay();
-        LocalDateTime dayEnd = dayStart.plusDays(1);
+        LocalDateTime dayStart = pagerDayService.startOfPagerDay(date);
+        LocalDateTime dayEnd = pagerDayService.startOfPagerDay(date.plusDays(1));
         LocalDateTime now = LocalDateTime.now();
 
         List<PagerPausePeriod> all = repository.findAll();
@@ -119,6 +130,9 @@ public class PagerPauseService {
         for (PagerPausePeriod period : all) {
             LocalDateTime start = period.getStartedAt();
             LocalDateTime end = period.getEndedAt() != null ? period.getEndedAt() : now;
+            if (java.time.Duration.between(start, end).toMinutes() < props.getMinQualifyingPauseMinutes()) {
+                continue; // too brief to count as a genuine "can't take pages" pause
+            }
             LocalDateTime overlapStart = start.isAfter(dayStart) ? start : dayStart;
             LocalDateTime overlapEnd = end.isBefore(dayEnd) ? end : dayEnd;
             if (overlapEnd.isAfter(overlapStart)) {

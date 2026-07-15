@@ -20,25 +20,28 @@ public class AnalyticsService {
     private final PageEventRepository pageEventRepository;
     private final TaskDebtLedgerRepository debtLedgerRepository;
     private final DebtCalculatorService debtCalculatorService;
+    private final PagerDayService pagerDayService;
 
     public AnalyticsService(TaskRepository taskRepository,
                              StudySessionRepository studySessionRepository,
                              PageEventRepository pageEventRepository,
                              TaskDebtLedgerRepository debtLedgerRepository,
-                             DebtCalculatorService debtCalculatorService) {
+                             DebtCalculatorService debtCalculatorService,
+                             PagerDayService pagerDayService) {
         this.taskRepository = taskRepository;
         this.studySessionRepository = studySessionRepository;
         this.pageEventRepository = pageEventRepository;
         this.debtLedgerRepository = debtLedgerRepository;
         this.debtCalculatorService = debtCalculatorService;
+        this.pagerDayService = pagerDayService;
     }
 
-    /** range: "today" (since 12:00 AM local time) or "lifetime" (all recorded history). */
+    /** range: "today" (since the pager-day cutoff, default 2:00 AM local time) or "lifetime" (all recorded history). */
     @Transactional(readOnly = true)
     public AnalyticsSummaryDto getSummary(String range) {
         boolean todayOnly = "today".equalsIgnoreCase(range);
         List<Task> tasks = taskRepository.findAllByOrderBySortOrderAsc();
-        LocalDate today = LocalDate.now();
+        LocalDate today = pagerDayService.currentPagerDate();
         LocalDate weekStart = today.minusDays(6);
 
         AnalyticsSummaryDto dto = new AnalyticsSummaryDto();
@@ -48,7 +51,7 @@ public class AnalyticsService {
         dto.lifetimeHoursByTask = lifetimeMinutesByTask(tasks);
 
         List<PageEvent> pageEvents = todayOnly
-                ? pageEventRepository.findBySentAtBetween(today.atStartOfDay(), LocalDateTime.now())
+                ? pageEventRepository.findBySentAtBetween(pagerDayService.startOfPagerDay(today), LocalDateTime.now())
                 : pageEventRepository.findAll();
 
         long total = pageEvents.size();
@@ -124,7 +127,7 @@ public class AnalyticsService {
     @Transactional(readOnly = true)
     public List<AnalyticsSummaryDto.TaskMinutesDto> getHours(String range) {
         List<Task> tasks = taskRepository.findAllByOrderBySortOrderAsc();
-        LocalDate today = LocalDate.now();
+        LocalDate today = pagerDayService.currentPagerDate();
         return switch (range) {
             case "week" -> minutesByTask(tasks, today.minusDays(6), today);
             case "lifetime" -> lifetimeMinutesByTask(tasks);

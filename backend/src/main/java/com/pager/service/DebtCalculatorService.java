@@ -25,18 +25,21 @@ public class DebtCalculatorService {
     private final StudySessionRepository studySessionRepository;
     private final TaskDebtLedgerRepository debtLedgerRepository;
     private final PagerPauseService pagerPauseService;
+    private final PagerDayService pagerDayService;
 
     public DebtCalculatorService(StudySessionRepository studySessionRepository,
                                   TaskDebtLedgerRepository debtLedgerRepository,
-                                  PagerPauseService pagerPauseService) {
+                                  PagerPauseService pagerPauseService,
+                                  PagerDayService pagerDayService) {
         this.studySessionRepository = studySessionRepository;
         this.debtLedgerRepository = debtLedgerRepository;
         this.pagerPauseService = pagerPauseService;
+        this.pagerDayService = pagerDayService;
     }
 
     @Transactional(readOnly = true)
     public int todayCompletedMinutes(Task task) {
-        return todayCompletedMinutes(task, LocalDate.now());
+        return todayCompletedMinutes(task, pagerDayService.currentPagerDate());
     }
 
     @Transactional(readOnly = true)

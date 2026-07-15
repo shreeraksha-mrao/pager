@@ -30,10 +30,13 @@ public class StudySessionService {
 
     private final StudySessionRepository studySessionRepository;
     private final TaskRepository taskRepository;
+    private final PagerDayService pagerDayService;
 
-    public StudySessionService(StudySessionRepository studySessionRepository, TaskRepository taskRepository) {
+    public StudySessionService(StudySessionRepository studySessionRepository, TaskRepository taskRepository,
+                                PagerDayService pagerDayService) {
         this.studySessionRepository = studySessionRepository;
         this.taskRepository = taskRepository;
+        this.pagerDayService = pagerDayService;
     }
 
     @Transactional
@@ -45,7 +48,7 @@ public class StudySessionService {
         LocalDateTime start = LocalDateTime.now();
         session.setStartTime(start);
         session.setEndTime(start.plusMinutes(pageEvent.getDurationMinutes()));
-        session.setSessionDate(start.toLocalDate());
+        session.setSessionDate(pagerDayService.pagerDateFor(start));
         return studySessionRepository.save(session);
     }
 
@@ -91,7 +94,7 @@ public class StudySessionService {
     public StudySession logManualSession(ManualSessionRequest request) {
         Task task = taskRepository.findById(request.taskId)
                 .orElseThrow(() -> new NoSuchElementException("Task not found: " + request.taskId));
-        LocalDate date = request.sessionDate != null ? request.sessionDate : LocalDate.now();
+        LocalDate date = request.sessionDate != null ? request.sessionDate : pagerDayService.currentPagerDate();
         int minutes = request.durationMinutes;
 
         StudySession session = new StudySession();

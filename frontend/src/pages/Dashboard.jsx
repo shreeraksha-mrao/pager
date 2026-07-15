@@ -20,7 +20,7 @@ export default function Dashboard() {
   if (isLoading) return <p className="text-slate-400">Loading dashboard…</p>;
   if (error) return <p className="text-red-400">Failed to load analytics: {error.message}</p>;
 
-  const rangeLabel = range === 'today' ? 'Today (since 12:00 AM)' : 'Lifetime (all time)';
+  const rangeLabel = range === 'today' ? 'Today (since 2:00 AM)' : 'Lifetime (all time)';
 
   return (
     <div className="grid gap-6">

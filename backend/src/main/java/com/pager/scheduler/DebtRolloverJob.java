@@ -5,6 +5,7 @@ import com.pager.entity.TaskDebtLedger;
 import com.pager.repository.TaskDebtLedgerRepository;
 import com.pager.repository.TaskRepository;
 import com.pager.service.DebtCalculatorService;
+import com.pager.service.PagerDayService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,19 +28,22 @@ public class DebtRolloverJob {
     private final TaskRepository taskRepository;
     private final TaskDebtLedgerRepository debtLedgerRepository;
     private final DebtCalculatorService debtCalculatorService;
+    private final PagerDayService pagerDayService;
 
     public DebtRolloverJob(TaskRepository taskRepository,
                             TaskDebtLedgerRepository debtLedgerRepository,
-                            DebtCalculatorService debtCalculatorService) {
+                            DebtCalculatorService debtCalculatorService,
+                            PagerDayService pagerDayService) {
         this.taskRepository = taskRepository;
         this.debtLedgerRepository = debtLedgerRepository;
         this.debtCalculatorService = debtCalculatorService;
+        this.pagerDayService = pagerDayService;
     }
 
-    @Scheduled(cron = "0 1 0 * * *") // 00:01 every day
+    @Scheduled(cron = "${pager.scheduler.rollover-cron:0 1 2 * * *}") // 02:01 by default — see day-cutoff-hour
     @Transactional
     public void rolloverYesterday() {
-        rolloverForDate(LocalDate.now().minusDays(1));
+        rolloverForDate(pagerDayService.currentPagerDate().minusDays(1));
     }
 
     @Transactional

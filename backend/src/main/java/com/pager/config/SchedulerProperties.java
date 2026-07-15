@@ -28,6 +28,9 @@ public class SchedulerProperties {
     private int confirmationReminderIntervalMinutes = 25;
     private int confirmationReminderMaxCount = 6;
     private int dailyMinimumTargetMinutes = 210;
+    private int dayCutoffHour = 2; // "today" runs from this hour to the same hour next day, not midnight
+    private String rolloverCron = "0 1 2 * * *"; // should stay ~1 min after dayCutoffHour
+    private int minQualifyingPauseMinutes = 15; // pauses shorter than this never affect debt rollover
 
     public long getTickIntervalMs() { return tickIntervalMs; }
     public void setTickIntervalMs(long tickIntervalMs) { this.tickIntervalMs = tickIntervalMs; }
@@ -85,4 +88,13 @@ public class SchedulerProperties {
 
     public int getDailyMinimumTargetMinutes() { return dailyMinimumTargetMinutes; }
     public void setDailyMinimumTargetMinutes(int dailyMinimumTargetMinutes) { this.dailyMinimumTargetMinutes = dailyMinimumTargetMinutes; }
+
+    public int getDayCutoffHour() { return dayCutoffHour; }
+    public void setDayCutoffHour(int dayCutoffHour) { this.dayCutoffHour = dayCutoffHour; }
+
+    public String getRolloverCron() { return rolloverCron; }
+    public void setRolloverCron(String rolloverCron) { this.rolloverCron = rolloverCron; }
+
+    public int getMinQualifyingPauseMinutes() { return minQualifyingPauseMinutes; }
+    public void setMinQualifyingPauseMinutes(int minQualifyingPauseMinutes) { this.minQualifyingPauseMinutes = minQualifyingPauseMinutes; }
 }
