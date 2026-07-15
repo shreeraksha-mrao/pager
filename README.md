@@ -44,10 +44,9 @@ $env:PAGER_TELEGRAM_BOT_TOKEN = "<your-bot-token>"   # optional, enables real pa
 mvn spring-boot:run
 ```
 
-The backend starts on `http://localhost:8080`, creates `backend/data/pager.db`
-(SQLite) on first run, applies `schema.sql`, and seeds the three default
-tasks from `src/main/resources/seed/default-tasks.json` if the `tasks` table
-is empty.
+The backend starts on `http://localhost:9090`, creates `backend/data/pager.db`
+(SQLite) on first run, applies `schema.sql`, and seeds the default tasks from
+`src/main/resources/seed/default-tasks.json` if the `tasks` table is empty.
 
 To register your phone for pages: message `/start` to your bot once the
 backend is running with a valid token — the chat id is then stored and used
@@ -66,10 +65,10 @@ mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
 
 ```powershell
 # Auto-select a task using the normal debt-weighted selection logic:
-Invoke-WebRequest -Uri "http://localhost:8080/api/debug/trigger-page" -Method Post -ContentType "application/json"
+Invoke-WebRequest -Uri "http://localhost:9090/api/debug/trigger-page" -Method Post -ContentType "application/json"
 
 # Or force a specific task:
-Invoke-WebRequest -Uri "http://localhost:8080/api/debug/trigger-page" -Method Post -ContentType "application/json" -Body '{"taskId": 2}'
+Invoke-WebRequest -Uri "http://localhost:9090/api/debug/trigger-page" -Method Post -ContentType "application/json" -Body '{"taskId": 2}'
 ```
 
 This endpoint is only registered when the `dev` profile is active — it is
@@ -96,9 +95,9 @@ backend (`vite.config.js`). Requires the backend to be running.
 
 ## Verifying the setup
 
-- `GET http://localhost:8080/api/tasks` should return the three seeded tasks.
-- `GET http://localhost:8080/api/analytics/summary` should return a full
-  analytics payload (zeros initially).
+- `GET http://localhost:9090/api/tasks` should return the seeded tasks.
+- `GET http://localhost:9090/api/analytics/summary?range=today` should return
+  a full analytics payload (zeros initially).
 - Visiting `http://localhost:5173` should show the Dashboard with live data
   from the backend.
 
@@ -112,9 +111,8 @@ Dashboard and Tasks page) to record it:
 - Creates a `StudySession` with `source: MANUAL` (vs `PAGE_ACCEPTED` for
   page-driven sessions) and `status: COMPLETED` immediately.
 - Counts toward today's completed minutes exactly like an accepted page —
-  debt (`/api/analytics/debt`), today/weekly/lifetime hours, and streaks all
-  update immediately, since they sum all `COMPLETED` sessions regardless of
-  source.
+  debt (`/api/analytics/debt`) and today/weekly/lifetime hours update
+  immediately, since they sum all `COMPLETED` sessions regardless of source.
 - `GET /api/analytics/session-sources` (and the `minutesFromPages` /
   `minutesFromManual` / `totalProductiveMinutes` fields on
   `/api/analytics/summary`) break down lifetime productive minutes by how
