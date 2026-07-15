@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: pager-backend
+
+  datasource:
+    url: jdbc:sqlite:${PAGER_DB_PATH:./data/pager.db}
+    driver-class-name: org.sqlite.JDBC
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        format_sql: false
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+server:
+  port: ${PAGER_SERVER_PORT:9090}
+
+pager:
+  telegram:
+    bot-token: ${PAGER_TELEGRAM_BOT_TOKEN:}
+    polling-interval-ms: 2000
+  scheduler:
+    tick-interval-ms: 300000          # 5 min
+    working-hours-start: "11:00"
+    working-hours-end: "17:00"
+    night-low-window-start: "01:00"   # 1AM - 7AM => 30% relative probability
+    night-low-window-end: "07:00"
+    night-low-probability: 0.30
+    night-medium-window-start: "07:00" # 7AM - 11AM => 75% relative probability
+    night-medium-window-end: "11:00"
+    night-medium-probability: 0.75
+    base-tick-probability: 0.15
+    max-tick-probability: 0.60
+    min-gap-between-pages-minutes: 15
+    default-page-duration-minutes: 60
+    missed-page-timeout-minutes: 20
+    decline-cooldown-min-minutes: 15
+    decline-cooldown-max-minutes: 90
+    confirmation-reminder-interval-minutes: 25
+    confirmation-reminder-max-count: 6
+    daily-minimum-target-minutes: 210 # 3.5h default combined objective
+
+logging:
+  level:
+    com.pager: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

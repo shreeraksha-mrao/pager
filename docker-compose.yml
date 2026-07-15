@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: pager-backend:latest
+    container_name: pager-backend
+    restart: unless-stopped
+    environment:
+      # Set this in a local .env file (see .env.example) — never commit real tokens
+      - PAGER_TELEGRAM_BOT_TOKEN=${PAGER_TELEGRAM_BOT_TOKEN}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+    volumes:
+      - pager-data:/data
+    ports:
+      # Exposed directly too, in case you want to hit the API without going through the frontend
+      - "9090:9090"
+
+  frontend:
+    build:
+      context: ./frontend
+    image: pager-frontend:latest
+    container_name: pager-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pager-data:
+    driver: local

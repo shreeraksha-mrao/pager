@@ -1,0 +1,26 @@
+[
+  {
+    "name": "DSA",
+    "description": "Data Structures & Algorithms practice",
+    "dailyTargetMinutes": 60,
+    "priorityWeight": 1.0,
+    "color": "#3B82F6",
+    "icon": "🧮"
+  },
+  {
+    "name": "FDE",
+    "description": "Forward Deployed Engineering skill-building",
+    "dailyTargetMinutes": 60,
+    "priorityWeight": 1.0,
+    "color": "#10B981",
+    "icon": "🛠️"
+  },
+  {
+    "name": "AI Exploration",
+    "description": "Exploring AI tools, papers, and projects",
+    "dailyTargetMinutes": 60,
+    "priorityWeight": 1.0,
+    "color": "#8B5CF6",
+    "icon": "🤖"
+  }
+]
